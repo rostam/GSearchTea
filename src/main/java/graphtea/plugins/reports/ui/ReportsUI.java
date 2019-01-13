@@ -4,7 +4,6 @@
 // Distributed under the terms of the GNU General Public License (GPL): http://www.gnu.org/licenses/
 package graphtea.plugins.reports.ui;
 
-import de.neuland.jade4j.Jade4J;
 import graphtea.graph.ui.GHTMLPageComponent;
 import graphtea.platform.StaticUtils;
 import graphtea.platform.core.BlackBoard;
@@ -68,11 +67,6 @@ public class ReportsUI {
         model.put("reports", reports);
         model.put("categories", categories);
         model.put("categoryLists", categoryLists);
-        try {
-            h = Jade4J.render(getClass().getResource("sidebar.jade"), model);
-        } catch (IOException e) {
-            StaticUtils.addExceptionLog(e);
-        }
         System.out.println(h);
         html.setHTML(h);
     }

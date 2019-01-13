@@ -28,28 +28,8 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.util.Collector;
 
 import java.util.Collections;
-
-/**
- * Implements the "WordCount" program that computes a simple word occurrence histogram
- * over text files.
- *
- * <p>
- * The input is a plain text file with lines separated by newline characters.
- * <p>
- * This example shows how to:
- * <ul>
- * <li>write a simple Flink program.
- * <li>use Tuple data types.
- * <li>write and use user-defined functions.
- * </ul>
- *
- */
 @SuppressWarnings("serial")
-public class WordCount {
-
-    // *************************************************************************
-    //     PROGRAM
-    // *************************************************************************
+public class GSearch {
 
     public static void main(String[] args) throws Exception {
 //        final ParameterTool params = ParameterTool.fromArgs(args);
@@ -99,18 +79,14 @@ public class WordCount {
 
     public static final class Tokenizer implements FlatMapFunction<String, Tuple2<String, Double>> {
         public void flatMap(String value, Collector<Tuple2<String, Double>> out) {
-//            out.collect(new Tuple2<String, Double>(value,
-//                    Double.parseDouble(new ZagrebIndex().calculate(G6Format.stringToGraphModel(value)).toString())));
-
-            out.collect(new Tuple2<>(value,
-                    (double)G6Format.stringToGraphModel(value).getEdgesCount()));
+            out.collect(new Tuple2<>(value, (double)G6Format.stringToGraphModel(value).getEdgesCount()));
         }
     }
 
     public static class StringSum implements ReduceFunction<Tuple2<String, Double>> {
         @Override
         public Tuple2<String,Double> reduce(Tuple2<String, Double> in1, Tuple2<String, Double> in2) {
-            return new Tuple2<String,Double>(in1.getField(0)+","+in2.getField(0), in2.getField(1));
+            return new Tuple2<>(in1.getField(0) + "," + in2.getField(0), in2.getField(1));
         }
     }
 }
