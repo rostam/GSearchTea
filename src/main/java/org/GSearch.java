@@ -41,7 +41,7 @@ public class GSearch {
 
         // get input data
         //DataSet<String> text = env.readTextFile("file:///home/rostam/kara/test.tt");
-        DataSet<String> text = env.readTextFile("file:///home/rostam/kara/graphs/all8.g6");
+        DataSet<String> text = env.readTextFile("all7.g6");
 
         //GraphModel g = new GraphModel(false);
         DataSet<Tuple2<String, Double>> counts =
