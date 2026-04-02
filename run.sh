@@ -21,20 +21,24 @@ usage() {
     echo "Commands:"
     echo "  build       Build the project (skips tests)"
     echo "  test        Run all unit tests"
-    echo "  stream      Run StreamingReport  - ABC index per graph     (reads: test.g6)"
-    echo "  spectral    Run Test             - spectral property search (requires: nauty)"
+    echo "  stream      Run StreamingReport  - ABC index per graph      (reads: test.g6)"
+    echo "  chromatic   Run ChromaticReport  - chromatic number counts  (default: all7.g6)"
+    echo "  spectral    Run Test             - spectral property search  (requires: nauty)"
     echo "  all         Build then run stream"
     echo ""
     echo "Note: Flink 1.6 was designed for Java 8. Some features may not work on Java 11+."
-    echo "  'stream'  : works but produces no output when window expires before stream ends"
-    echo "  'batch'   : GraphModel is not Flink-serializable; not supported"
-    echo "  'spectral': does not use Flink; works on any Java version"
+    echo "  'stream'   : requires --add-opens flags (applied automatically by this script)"
+    echo "  'batch'    : GraphModel is not Flink-serializable; not supported"
+    echo "  'chromatic': does not use Flink; works on any Java version"
+    echo "  'spectral' : does not use Flink; works on any Java version"
     echo ""
     echo "Examples:"
     echo "  $0 build"
     echo "  $0 test"
     echo "  $0 stream"
     echo "  $0 stream my_graphs.g6"
+    echo "  $0 chromatic"
+    echo "  $0 chromatic my_graphs.g6"
     echo "  $0 spectral"
     echo "  $0 all"
 }
@@ -80,6 +84,16 @@ case "$CMD" in
         fi
         echo "==> Running StreamingReport (Ctrl-C to stop)..."
         java $JVM_FLAGS -cp "$(classpath)" org.StreamingReport
+        ;;
+    chromatic)
+        require_jar
+        G6FILE="${2:-all7.g6}"
+        if [ ! -f "$G6FILE" ]; then
+            echo "Error: G6 file not found: $G6FILE" >&2
+            exit 1
+        fi
+        echo "==> Computing chromatic numbers for $G6FILE..."
+        java -cp "$(classpath)" org.ChromaticReport "$G6FILE"
         ;;
     spectral)
         require_jar

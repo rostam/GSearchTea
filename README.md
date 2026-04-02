@@ -29,7 +29,8 @@ cd GSearchTea
 |---------|-------------|
 | `build` | Compile the project, skip tests |
 | `test` | Run all unit tests |
-| `stream [file]` | Run `StreamingReport` — computes ABC index per graph (default: `test.g6`) |
+| `stream [file]` | Run `StreamingReport` — ABC index per graph (default: `test.g6`) |
+| `chromatic [file]` | Run `ChromaticReport` — chromatic number frequency table (default: `all7.g6`) |
 | `spectral` | Run `Test` — spectral property search via `nauty-geng` (no Flink) |
 | `all [file]` | Build then run `stream` |
 
@@ -52,7 +53,8 @@ Test reports are written to `target/surefire-reports/`.
 
 | Class | Input | Description |
 |-------|-------|-------------|
-| `org.StreamingReport` | `test.g6` | Flink streaming: computes ABC index per graph in 5s time windows |
+| `org.StreamingReport` | `test.g6` | Flink streaming: computes ABC index per graph |
+| `org.ChromaticReport` | any G6 file | Chromatic number frequency table; no Flink dependency |
 | `org.Test` | `nauty-geng` output | Spectral property search over generated graphs; no Flink dependency |
 | `org.GSearch` | `all7.g6` | Flink batch: groups graphs by edge count (has a known type-erasure bug) |
 | `org.GSearchBatch` | `all7.g6` | Flink batch: loads and prints all graphs (incompatible with Java 9+) |
@@ -159,6 +161,46 @@ that specific caterpillar trees beat the path for n ≥ 10.
 Full results can be reproduced with:
 ```bash
 ./run.sh stream
+```
+
+## Results: Chromatic Number on Connected Graphs with 7 Vertices
+
+`ChromaticReport` was run over `all7.g6`, which contains all **853 connected graphs on 7 vertices**.
+The chromatic number χ(G) is the minimum number of colours needed to colour the vertices so that no two adjacent vertices share the same colour.
+
+### Frequency Table
+
+| χ(G) | Count | Percent | Meaning |
+|------|-------|---------|---------|
+| 2    | 44    | 5.2%    | Bipartite (trees, even cycles, complete bipartite graphs) |
+| 3    | 475   | 55.7%   | Non-bipartite, triangle-free or with odd cycles but no K₄ |
+| 4    | 282   | 33.1%   | Contains K₄ or requires 4 colours |
+| 5    | 46    | 5.4%    | Contains K₅ minor or dense subgraphs |
+| 6    | 5     | 0.6%    | Near-complete graphs |
+| 7    | 1     | 0.1%    | K₇ (the complete graph on 7 vertices) |
+
+### Distribution
+
+```
+χ=2  ████                                                 44   (5.2%)
+χ=3  ████████████████████████████████████████████████████ 475  (55.7%)
+χ=4  ████████████████████████████████                    282  (33.1%)
+χ=5  █████                                                46   (5.4%)
+χ=6  █                                                     5   (0.6%)
+χ=7  ▏                                                     1   (0.1%)
+```
+
+### Observations
+
+- The majority of connected 7-vertex graphs (55.7%) require exactly 3 colours — reflecting how common odd cycles but not K₄ are in this graph class.
+- Only 44 graphs (5.2%) are bipartite (χ = 2). All 106 trees in `test.g6` are bipartite (χ = 2 for all of them, confirmed separately).
+- The unique χ = 7 graph is **K₇**, the complete graph where every pair of vertices is connected.
+- The 5 graphs with χ = 6 are near-complete graphs missing only a small number of edges from K₇.
+
+Reproduce with:
+```bash
+./run.sh chromatic            # runs on all7.g6
+./run.sh chromatic test.g6    # runs on trees (all χ=2)
 ```
 
 ## License
