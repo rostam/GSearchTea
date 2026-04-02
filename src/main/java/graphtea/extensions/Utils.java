@@ -43,9 +43,9 @@ public class Utils {
     }
 
     public static double getDegreeSum(GraphModel g, double alpha) {
-        int sum = 0;
+        double sum = 0;
         for(Vertex v: g) {
-            sum+=getDegreeSumOfVertex(g,alpha,v);
+            sum += getDegreeSumOfVertex(g, alpha, v);
         }
         return sum;
     }

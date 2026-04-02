@@ -58,12 +58,12 @@ public class RandomGenerator implements GraphGeneratorExtension, Parametrizable,
     }
 
     private Edge randomEdge() {
-        Vertex v1 = randomVertex();
-        Vertex v2 = randomVertex();
-        if (v1 != v2)
-            return new Edge(v1, v2);
-        else
-            return randomEdge();
+        Vertex v1, v2;
+        do {
+            v1 = randomVertex();
+            v2 = randomVertex();
+        } while (v1 == v2);
+        return new Edge(v1, v2);
     }
 
     private Vertex randomVertex() {

@@ -7,23 +7,17 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.time.Time;
 
-//@SuppressWarnings("serial")
 public class StreamingReport {
     public static void main(String[] args) throws Exception {
       StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
       DataStream<Tuple2<String,Double>> dataStream =
         env.readTextFile("test.g6")
-//        .socketTextStream("localhost", 9999)
-        .map(new ABCIndex())
-        .keyBy(0)
-        .timeWindow(Time.seconds(5))
-        .sum(1);
+        .map(new ABCIndex());
 
       dataStream.print();
 
-      env.execute("Window StreamingReport");
+      env.execute("StreamingReport");
     }
 
     public static class ABCIndex implements MapFunction<String,Tuple2<String,Double>> {

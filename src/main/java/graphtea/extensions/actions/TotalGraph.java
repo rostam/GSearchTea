@@ -40,7 +40,6 @@ public class TotalGraph implements GraphActionExtension, Parametrizable {
         for(Edge e : g1.getEdges()) {
             GPoint v1 = e.source.getLocation();
             GPoint v2 = e.target.getLocation();
-            double dis = v1.distance(v2);
             GPoint v3 = GPoint.sub(v2, v1);
             v3 = GPoint.div(v3, k+1);
 

@@ -13,10 +13,10 @@ import graphtea.plugins.main.extension.GraphActionExtension;
  * Created by rostam on 10.07.15.
  */
 public class Union implements GraphActionExtension, Parametrizable {
-    @Parameter(name = "First Graph",description = "First Graph")
-    public String fG = "G0";
-    @Parameter(name = "Second Graph",description = "Second Graph")
-    public String sG = "G1";
+    @Parameter(name = "First Graph", description = "First Graph")
+    public String g0 = "G0";
+    @Parameter(name = "Second Graph", description = "Second Graph")
+    public String g1 = "G1";
 
     @Override
     public String getName() {
@@ -31,11 +31,10 @@ public class Union implements GraphActionExtension, Parametrizable {
     @Override
     public void action(GraphData graphData) {
         GTabbedGraphPane gtp = graphData.getBlackboard().getData(GTabbedGraphPane.NAME);
-        GraphSum prod = new GraphSum();
-        GraphModel g1 = gtp.getGraphs().get(fG);
-        GraphModel g2 = gtp.getGraphs().get(sG);
-        GraphModel g= (GraphModel) GraphUnion.union(g1, g2);
-        GraphSum.setUnionLabel(g1,g2,g);
+        GraphModel first = gtp.getGraphs().get(g0);
+        GraphModel second = gtp.getGraphs().get(g1);
+        GraphModel g = (GraphModel) GraphUnion.union(first, second);
+        GraphSum.setUnionLabel(first, second, g);
         graphData.core.showGraph(g);
     }
 

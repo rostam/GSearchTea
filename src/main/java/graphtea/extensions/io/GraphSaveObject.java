@@ -4,8 +4,8 @@ import graphtea.graph.graph.Edge;
 import graphtea.graph.graph.GraphModel;
 import graphtea.graph.graph.Vertex;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.*;
+import java.util.Base64;
 import java.util.Vector;
 
 /**
@@ -76,15 +76,15 @@ public class GraphSaveObject implements Serializable {
     }
 
     public static String graph2String(GraphModel g){
-        return DatatypeConverter.printBase64Binary(getBytesOfGraph(g));
+        return Base64.getEncoder().encodeToString(getBytesOfGraph(g));
     }
 
     public static GraphModel String2Graph(String s){
-        return getGraphFromBytes(DatatypeConverter.parseBase64Binary(s));
+        return getGraphFromBytes(Base64.getDecoder().decode(s));
     }
 
     public static GraphSaveObject string2GraphSaveObject(String s){
-        return getGraphSaveOobjectfromBytes(DatatypeConverter.parseBase64Binary(s));
+        return getGraphSaveOobjectfromBytes(Base64.getDecoder().decode(s));
     }
 
     public static GraphSaveObject getGraphSaveOobjectfromBytes(byte[] b){
