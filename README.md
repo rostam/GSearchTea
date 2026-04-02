@@ -32,11 +32,13 @@ cd GSearchTea
 | `stream [file]` | Run `StreamingReport` — ABC index per graph (default: `test.g6`) |
 | `chromatic [file]` | Run `ChromaticReport` — chromatic number frequency table (default: `all7.g6`) |
 | `spectral` | Run `Test` — spectral property search via `nauty-geng` (no Flink) |
+| `gui` | Launch `GraphReportGUI` — interactive Swing GUI |
 | `all [file]` | Build then run `stream` |
 
 ```bash
 ./run.sh stream my_graphs.g6   # use a custom G6 file
 ./run.sh spectral              # requires nauty-geng on PATH
+./run.sh gui                   # open the graphical interface
 ```
 
 ## Running Tests Only
@@ -53,6 +55,7 @@ Test reports are written to `target/surefire-reports/`.
 
 | Class | Input | Description |
 |-------|-------|-------------|
+| `org.GraphReportGUI` | any G6 file (via file chooser) | Swing GUI: interactive report runner with table output and CSV export |
 | `org.StreamingReport` | `test.g6` | Flink streaming: computes ABC index per graph |
 | `org.ChromaticReport` | any G6 file | Chromatic number frequency table; no Flink dependency |
 | `org.Test` | `nauty-geng` output | Spectral property search over generated graphs; no Flink dependency |
@@ -84,7 +87,7 @@ Flink 1.6 was designed for Java 8 and uses reflection techniques blocked by the 
 
 ```
 src/main/java/
-  org/                          # Entry points (GSearch, GSearchBatch, StreamingReport, Test)
+  org/                          # Entry points (GraphReportGUI, GSearch, GSearchBatch, StreamingReport, Test)
   graphtea/extensions/
     G6Format.java               # G6 encode/decode
     Utils.java                  # Graph utility methods (degree, Laplacian, etc.)
@@ -101,6 +104,52 @@ src/test/java/
     UtilsTest.java              # Utility method tests  (16 tests)
     actions/BarycentricSubdivisionGraphTest.java  (9 tests)
     generators/RandomGeneratorTest.java           (4 tests)
+```
+
+## GraphReportGUI
+
+`GraphReportGUI` is an interactive Swing application for running any combination of graph reports over a G6 file without touching the command line.
+
+```bash
+./run.sh build   # first time only
+./run.sh gui
+```
+
+### Features
+
+- **Load any G6 file** via a file chooser dialog — graphs appear in a list on the left.
+- **Select graphs** individually or with *Select All / Select None*.
+- **Choose reports** from four categorised checkbox panels:
+
+  | Category | Reports |
+  |----------|---------|
+  | General | Number of Vertices, Number of Edges, Max/Min Degree, Number of Triangles, Connected Components, Girth Size, Is Bipartite, Is Eulerian |
+  | Coloring | Chromatic Number |
+  | Topological Indices | Randic Index, Harmonic Index, Hyper Zagreb Index, Balaban Index |
+  | Spectral | Laplacian Energy, Laplacian Energy-Like |
+
+- **Run** — reports execute in a background thread with a progress bar; results appear row-by-row in a scrollable table.
+- **Summary statistics** — min, max, mean, and count are computed automatically for every numeric column.
+- **Export CSV** — saves the full results table to a `.csv` file.
+
+### Screenshot layout
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [Open G6 File...]                                           │
+│  ┌─── Graphs ─────┐  ┌─── Reports ─────────────────────────┐│
+│  │ 1: I?AA@_gw?   │  │ ☑ Vertices  ☑ Edges  ☑ Chromatic…  ││
+│  │ 2: I??E@_Ki?   │  └─────────────────────────────────────┘│
+│  │ …              │  ┌─── Results ─────────────────────────┐│
+│  │                │  │  Graph (G6) │ Vertices │ Chromatic… ││
+│  │ [Select All]   │  │  I?AA@_gw?  │    10    │     2      ││
+│  │ [Select None]  │  │  …          │   …      │   …        ││
+│  └────────────────┘  └─────────────────────────────────────┘│
+│                       ┌─── Summary ─────────────────────────┐│
+│                       │  Chromatic Number  min=2 max=3 …    ││
+│                       └─────────────────────────────────────┘│
+│  [Run Reports]  [Export CSV...]          ████████░░  73%    │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ## Results: ABC Index on Trees with 10 Vertices
