@@ -38,7 +38,7 @@ public class ChromaticReport {
         System.out.println("Graphs : " + total);
         System.out.println();
         System.out.printf("%-16s  %-8s  %s%n", "Chromatic number", "Count", "Percent");
-        System.out.println("-".repeat(42));
+        System.out.println("------------------------------------------");
         for (Map.Entry<Integer, Integer> e : freq.entrySet()) {
             double pct = 100.0 * e.getValue() / total;
             System.out.printf("%-16d  %-8d  %.1f%%%n", e.getKey(), e.getValue(), pct);
