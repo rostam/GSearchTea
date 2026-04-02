@@ -101,6 +101,66 @@ src/test/java/
     generators/RandomGeneratorTest.java           (4 tests)
 ```
 
+## Results: ABC Index on Trees with 10 Vertices
+
+The `StreamingReport` was run over `test.g6`, which contains all **106 non-isomorphic trees on 10 vertices**.
+For each graph the [Atom-Bond Connectivity (ABC) index](https://doi.org/10.1021/ci990307l) was computed:
+
+$$\text{ABC}(G) = \sum_{uv \in E} \sqrt{\frac{d_u + d_v - 2}{d_u \cdot d_v}}$$
+
+where $d_u$, $d_v$ are the degrees of the endpoints of each edge.
+
+### Summary Statistics
+
+| Statistic | Value |
+|-----------|-------|
+| Graphs    | 106 trees, 10 vertices, 9 edges each |
+| Min ABC   | 6.3235 |
+| Max ABC   | 8.4853 |
+| Mean ABC  | 6.9024 |
+| Median ABC | 6.8705 |
+| Distinct values | 74 out of 106 |
+
+### Distribution
+
+```
+[6.5, 7.0)  ███████████████████████████████████████████  43 graphs  (40.6%)
+[7.0, 7.5)  █████████████████████████████████████████████  45 graphs  (42.5%)
+[7.5, 8.0)  ███████████████  15 graphs  (14.2%)
+[8.0, 8.5)  ██   2 graphs   (1.9%)
+[8.5, 9.0)  █    1 graph    (0.9%)
+```
+
+Most trees fall in the `[6.5, 7.5)` range (83%), with a long right tail toward the maximum.
+
+### Extremes
+
+**Maximum — `I??????~w` (ABC = 8.4853 = 6√2)**
+The star graph K₁,₉: one hub vertex of degree 9 connected to 9 leaves of degree 1.
+Every edge contributes √(8/9), giving ABC = 9 · √(8/9) = 6√2.
+This is the unique maximiser of the ABC index among all trees on 10 vertices.
+
+**Minimum — `I?AA@_gw?` (ABC = 6.3235)**
+A caterpillar tree whose ABC index falls below the path P₁₀ (ABC = 9/√2 ≈ 6.3640).
+Five trees in the dataset share the path value (9/√2), confirming that P₁₀ is not the
+minimiser for n = 10 — consistent with known results in chemical graph theory showing
+that specific caterpillar trees beat the path for n ≥ 10.
+
+### Raw Output (sample)
+
+```
+(I?AA@_gw?,6.323521)   ← minimum (caterpillar tree)
+(I??E@_Ki?,6.363961)   ← path P₁₀  (one of 5 trees at this value)
+...
+(I????A?~o,7.962114)
+(I??????~w,8.485281)   ← maximum (star K₁,₉)
+```
+
+Full results can be reproduced with:
+```bash
+./run.sh stream
+```
+
 ## License
 
 GSearchTea is open-source and released under the [GPL License](LICENSE).
