@@ -26,6 +26,7 @@ public class ChromaticNumber implements GraphReportExtension, ColoringListener {
     boolean found;
 
     public Object calculate(GraphModel g) {
+        if (g.getEdgesCount() == 0) return g.numOfVertices() > 0 ? 1 : 0;
         p = new Partitioner(g);
         ct = 1;
         found = false;
