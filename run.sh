@@ -24,6 +24,7 @@ usage() {
     echo "  stream      Run StreamingReport  - ABC index per graph      (reads: test.g6)"
     echo "  chromatic   Run ChromaticReport  - chromatic number counts  (default: all7.g6)"
     echo "  spectral    Run Test             - spectral property search  (requires: nauty)"
+    echo "  gui         Launch GraphReportGUI - interactive Swing GUI"
     echo "  all         Build then run stream"
     echo ""
     echo "Note: Flink 1.6 was designed for Java 8. Some features may not work on Java 11+."
@@ -40,6 +41,7 @@ usage() {
     echo "  $0 chromatic"
     echo "  $0 chromatic my_graphs.g6"
     echo "  $0 spectral"
+    echo "  $0 gui"
     echo "  $0 all"
 }
 
@@ -103,6 +105,11 @@ case "$CMD" in
         fi
         echo "==> Running spectral property search..."
         java -cp "$(classpath)" org.Test
+        ;;
+    gui)
+        require_jar
+        echo "==> Launching GraphReportGUI..."
+        java -cp "$(classpath)" org.GraphReportGUI
         ;;
     all)
         build
