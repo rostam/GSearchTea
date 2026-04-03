@@ -23,6 +23,7 @@ usage() {
     echo "  test        Run all unit tests"
     echo "  stream      Run StreamingReport  - ABC index per graph      (reads: test.g6)"
     echo "  chromatic   Run ChromaticReport  - chromatic number counts  (default: all7.g6)"
+    echo "  nonhomo     Run NonHomoReport    - nonhomo(G,H) for canonical pairs"
     echo "  spectral    Run Test             - spectral property search  (requires: nauty)"
     echo "  gui         Launch GraphReportGUI - interactive Swing GUI"
     echo "  all         Build then run stream"
@@ -96,6 +97,11 @@ case "$CMD" in
         fi
         echo "==> Computing chromatic numbers for $G6FILE..."
         java -cp "$(classpath)" org.ChromaticReport "$G6FILE"
+        ;;
+    nonhomo)
+        require_jar
+        echo "==> Computing nonhomo for canonical graph pairs..."
+        java -cp "$(classpath)" org.NonHomoReport
         ;;
     spectral)
         require_jar

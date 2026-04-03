@@ -31,6 +31,7 @@ cd GSearchTea
 | `test` | Run all unit tests |
 | `stream [file]` | Run `StreamingReport` — ABC index per graph (default: `test.g6`) |
 | `chromatic [file]` | Run `ChromaticReport` — chromatic number frequency table (default: `all7.g6`) |
+| `nonhomo` | Run `NonHomoReport` — nonhomo(G, H) for canonical graph pairs |
 | `spectral` | Run `Test` — spectral property search via `nauty-geng` (no Flink) |
 | `gui` | Launch `GraphReportGUI` — interactive Swing GUI |
 | `all [file]` | Build then run `stream` |
@@ -58,6 +59,7 @@ Test reports are written to `target/surefire-reports/`.
 | `org.GraphReportGUI` | any G6 file (via file chooser) | Swing GUI: interactive report runner with table output and CSV export |
 | `org.StreamingReport` | `test.g6` | Flink streaming: computes ABC index per graph |
 | `org.ChromaticReport` | any G6 file | Chromatic number frequency table; no Flink dependency |
+| `org.NonHomoReport`   | (none) | Computes nonhomo(G, H) for canonical graph pairs; no Flink dependency |
 | `org.Test` | `nauty-geng` output | Spectral property search over generated graphs; no Flink dependency |
 | `org.GSearch` | `all7.g6` | Flink batch: groups graphs by edge count (has a known type-erasure bug) |
 | `org.GSearchBatch` | `all7.g6` | Flink batch: loads and prints all graphs (incompatible with Java 9+) |
@@ -251,6 +253,159 @@ Reproduce with:
 ./run.sh chromatic            # runs on all7.g6
 ./run.sh chromatic test.g6    # runs on trees (all χ=2)
 ```
+
+## Results: nonhomo — Non-Homomorphism Distance
+
+### Definition
+
+For graphs G and H, **nonhomo(G, H)** is the minimum number of edges that must be
+removed from G so that the resulting graph admits a graph homomorphism to H.
+
+A *graph homomorphism* f : G → H is a map from V(G) to V(H) that preserves
+adjacency: whenever (u, v) is an edge in G, (f(u), f(v)) must be an edge in H.
+
+Equivalently:
+
+$$\text{nonhomo}(G, H) = \min_{f\,:\,V(G)\to V(H)} \bigl|\{(u,v)\in E(G) : (f(u),\,f(v))\notin E(H)\}\bigr|$$
+
+**Special cases:**
+
+| Expression | Meaning |
+|---|---|
+| nonhomo(G, K_k) | Minimum edges to remove to make G k-colourable |
+| nonhomo(G, K_2) | Minimum edges to remove to make G bipartite (bipartite edge deletion number) |
+| nonhomo(G, H) = 0 | G is already homomorphic to H |
+
+**Implementation:** `NonHomomorphism.java` uses branch-and-bound over all
+|V(H)|^|V(G)| vertex mappings, pruning a branch as soon as its accumulated
+bad-edge count meets or exceeds the current best.
+
+Run with:
+```bash
+./run.sh nonhomo
+```
+
+---
+
+### nonhomo(K_n, K_m)
+
+Complete graphs (rows are G = K_n, columns are H = K_m; entries marked — are not applicable since m > n):
+
+| G \ H | K_1 | K_2 | K_3 | K_4 | K_5 | K_6 | K_7 | K_8 |
+|-------|-----|-----|-----|-----|-----|-----|-----|-----|
+| K_1   |   0 |  —  |  —  |  —  |  —  |  —  |  —  |  —  |
+| K_2   |   1 |   0 |  —  |  —  |  —  |  —  |  —  |  —  |
+| K_3   |   3 |   1 |   0 |  —  |  —  |  —  |  —  |  —  |
+| K_4   |   6 |   2 |   1 |   0 |  —  |  —  |  —  |  —  |
+| K_5   |  10 |   4 |   2 |   1 |   0 |  —  |  —  |  —  |
+| K_6   |  15 |   6 |   3 |   2 |   1 |   0 |  —  |  —  |
+| K_7   |  21 |   9 |   5 |   3 |   2 |   1 |   0 |  —  |
+| K_8   |  28 |  12 |   7 |   4 |   3 |   2 |   1 |   0 |
+
+**Closed form.** Since G → K_m iff G is m-colourable, the optimal strategy for
+K_n → K_m is to partition the n vertices into m colour classes as evenly as
+possible (sizes ⌊n/m⌋ and ⌈n/m⌉) and remove all within-class edges:
+
+$$\text{nonhomo}(K_n, K_m) = r\binom{\lfloor n/m\rfloor+1}{2} + (m-r)\binom{\lfloor n/m\rfloor}{2},\quad r = n \bmod m$$
+
+For example, K_7 → K_3: q=2, r=1 → 1·C(3,2) + 2·C(2,2) = 3 + 2 = **5** ✓
+
+---
+
+### nonhomo(C_n, K_2) — edges to remove to make a cycle bipartite
+
+| n  | nonhomo(C_n, K_2) | note                    |
+|----|-------------------|-------------------------|
+|  3 |                 1 | odd cycle               |
+|  4 |                 0 | even cycle (bipartite)  |
+|  5 |                 1 | odd cycle               |
+|  6 |                 0 | even cycle (bipartite)  |
+|  7 |                 1 | odd cycle               |
+|  8 |                 0 | even cycle (bipartite)  |
+|  9 |                 1 | odd cycle               |
+| 10 |                 0 | even cycle (bipartite)  |
+| 11 |                 1 | odd cycle               |
+| 12 |                 0 | even cycle (bipartite)  |
+| 13 |                 1 | odd cycle               |
+| 14 |                 0 | even cycle (bipartite)  |
+| 15 |                 1 | odd cycle               |
+
+**Pattern:** nonhomo(C_n, K_2) = 0 if n is even; 1 if n is odd.
+Even cycles are bipartite by definition; removing any single edge from an odd
+cycle produces a path (which is bipartite).
+
+---
+
+### nonhomo(C_n, C_5)
+
+| n  | nonhomo(C_n, C_5) |
+|----|-------------------|
+|  3 |                 1 |
+|  4 |                 0 |
+|  5 |                 0 |
+|  6 |                 0 |
+|  7 |                 0 |
+|  8 |                 0 |
+|  9 |                 0 |
+| 10 |                 0 |
+| 11 |                 0 |
+| 12 |                 0 |
+| 13 |                 0 |
+| 14 |                 0 |
+| 15 |                 0 |
+
+**Observations:**
+
+- **C_3 → C_5 = 1:** C_3 = K_3 is a triangle; C_5 has girth 5 and contains no
+  triangle, so no homomorphism exists. Removing one edge of C_3 yields a path
+  P_3, which maps to C_5 easily. Thus 1 edge suffices.
+- **C_n → C_5 = 0 for n ≥ 4:** A valid homomorphism exists for every n ≥ 4.
+  For even n: any even cycle folds onto K_2 ⊂ C_5. For odd n ≥ 5: the
+  wrapping map f(i) = i mod 5 works for all n (every "wrap edge" (n−1, 0)
+  maps to an edge in C_5).
+- The special case n = 3 is thus the only cycle requiring an edge removal to
+  reach C_5.
+
+---
+
+### nonhomo(Petersen graph, K_k)
+
+The Petersen graph GP(5,2): 10 vertices, 15 edges, 3-regular, girth 5,
+chromatic number 3.
+
+| k | nonhomo(Petersen, K_k) | interpretation                             |
+|---|------------------------|--------------------------------------------|
+| 1 |                     15 | K_1 has no edges; remove all 15 edges      |
+| 2 |                      3 | Remove 3 edges to make Petersen bipartite  |
+| 3 |                      0 | χ(Petersen) = 3 → already maps to K_3      |
+| 4 |                      0 | χ ≤ k → already maps to K_4                |
+| 5 |                      0 | trivially homomorphic to K_5               |
+
+**Notable result:** nonhomo(Petersen, K_2) = **3**. Despite being 3-regular with
+girth 5, the Petersen graph requires removing only 3 edges to become bipartite
+(each of the five 5-cycles in the inner pentagram contributes to the obstruction;
+the minimum odd-cycle edge-transversal has size 3).
+
+---
+
+### nonhomo(K_{m,n}, K_k) for small m, n
+
+| G         | nonhomo(G, K_2) | nonhomo(G, K_3) |
+|-----------|-----------------|-----------------|
+| K_{1,1}   |               0 |               0 |
+| K_{1,2}   |               0 |               0 |
+| K_{1,3}   |               0 |               0 |
+| K_{1,4}   |               0 |               0 |
+| K_{2,2}   |               0 |               0 |
+| K_{2,3}   |               0 |               0 |
+| K_{2,4}   |               0 |               0 |
+| K_{3,3}   |               0 |               0 |
+
+All complete bipartite graphs satisfy nonhomo(K_{m,n}, K_k) = 0 for any k ≥ 2,
+since they are bipartite (χ = 2) and every bipartite graph already admits a
+homomorphism to K_2 ⊆ K_k.
+
+---
 
 ## License
 
